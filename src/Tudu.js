@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
+// undo
+import useUndo from 'use-undo';
+// UI components and styles
 import { makeStyles } from '@material-ui/core/styles';
-// UI components
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import Snackbar from '@material-ui/core/Snackbar';
 // icons
+import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Create';
-
+import CloseIcon from '@material-ui/icons/Close';
+// stylesheets
 import './Tudu.css';
 
 const useStyles = makeStyles((theme) => ({
@@ -21,8 +25,6 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
-
 const idMaker = () => {
     const chars = '0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM';
     let id = '';
@@ -33,11 +35,13 @@ const idMaker = () => {
 function Tudu() {
     const classes = useStyles();
     const [newItem, setNewItem] = useState('');
-    const [items, setItems] = useState([
-        {complete: false, id: "PMVyujwET", name: "What"},
-        {complete: false, id: "ZaDwlCO4q", name: "It"},
-        {complete: false, id: "blM6fC67H", name: "Do?"}
-      ]);
+    const [items, { set: setItems, undo: undoItems }] = useUndo([
+        { complete: false, id: "PMVyujwET", name: "What" },
+        { complete: false, id: "ZaDwlCO4q", name: "It" },
+        { complete: false, id: "blM6fC67H", name: "Do?" }
+    ]);
+    const { present: presentItems } = items;
+    const [undoBarOpen, setUndoBarOpen] = useState(false);
 
     const addNewItem = e => {
         e.preventDefault();
@@ -45,22 +49,25 @@ function Tudu() {
             let newItemData = { 'complete': false };
             newItemData.name = newItem;
             newItemData.id = idMaker();
-            setItems(items => [...items, newItemData]);
+            let newItems = [...presentItems];
+            newItems.push(newItemData);
+            setItems(newItems);
             setNewItem('');
         }
     }
 
     const deleteItem = id => {
-        let index = items.findIndex(item => item.id === id);
-        let newItems = [...items];
+        let index = presentItems.findIndex(item => item.id === id);
+        let newItems = [...presentItems];
         newItems.splice(index, 1);
         setItems(newItems);
+        setUndoBarOpen(true);
     }
-    
+
     const handleItems = () => {
         return (
             <div className="items">
-                {items.map(item => {
+                {presentItems.map(item => {
                     return (
                         <div key={item.id} className={item.complete ? 'item complete' : 'item'}>
                             <FormControlLabel
@@ -87,10 +94,43 @@ function Tudu() {
 
     const handleCheck = id => {
         // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
-        let index = items.findIndex(item => item.id === id);
-        let newItems = [...items];
+        let index = presentItems.findIndex(item => item.id === id);
+        let newItems = [...presentItems];
         newItems[index].complete = !newItems[index].complete;
         setItems(newItems);
+        console.log(newItems)
+    }
+
+    const handleCloseUndoBar = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setUndoBarOpen(false);
+    }
+
+    const handleUndoItems = () => {
+        undoItems();
+        setUndoBarOpen(false);
+    }
+
+    const undoSnackbar = () => {
+        return <Snackbar
+            anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+            open={undoBarOpen}
+            autoHideDuration={6000}
+            onClose={handleCloseUndoBar}
+            message="Item Deleted"
+            action={
+                <>
+                    <Button color="secondary" size="small" onClick={handleUndoItems}>
+                        UNDO
+                    </Button>
+                    <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseUndoBar}>
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                </>
+            }
+        />
     }
 
     return (
@@ -110,6 +150,7 @@ function Tudu() {
                     </Button>
                 </form>
             </div>
+            {undoSnackbar()}
         </div>
     );
 }
