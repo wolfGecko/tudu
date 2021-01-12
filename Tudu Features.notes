@@ -6,8 +6,9 @@ lightmode / darkmode
 Read Items
     in order created
 Update Items
-    edit text
+    edit text - maybe not
     reorder
+        https://www.npmjs.com/package/react-sortable-hoc
 // Delete Items
 
 // Mark items as complete

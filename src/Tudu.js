@@ -11,8 +11,8 @@ import Snackbar from '@material-ui/core/Snackbar';
 // icons
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Create';
 import CloseIcon from '@material-ui/icons/Close';
+import DragHandleIcon from '@material-ui/icons/DragHandle';
 // stylesheets
 import './Tudu.css';
 
@@ -82,7 +82,7 @@ function Tudu() {
                                 label={item.name}
                             />
                             <span className="item-icons">
-                                <IconButton aria-label="edit"><EditIcon fontSize="small" /></IconButton>
+                                <IconButton aria-label="edit"><DragHandleIcon fontSize="small" /></IconButton>
                                 <IconButton aria-label="delete" onClick={() => deleteItem(item.id)}><DeleteIcon fontSize="small" /></IconButton>
                             </span>
                         </div>
@@ -115,7 +115,7 @@ function Tudu() {
 
     const undoSnackbar = () => {
         return <Snackbar
-            anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             open={undoBarOpen}
             autoHideDuration={6000}
             onClose={handleCloseUndoBar}
@@ -133,11 +133,18 @@ function Tudu() {
         />
     }
 
+    const displayDate = () => {
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var today = new Date();
+        return today.toLocaleDateString("en-US", options);
+    }
+
     return (
         <div className="bg">
             <div className="wrapper">
                 <h1>Tudu</h1>
-                <h2>Stupid Simple Todo List App</h2>
+                <h2>Stupid Simple Todo List</h2>
+                <h3>{displayDate()}</h3>
                 {handleItems()}
                 <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
                     <TextField label="New item" onChange={e => setNewItem(e.target.value)} value={newItem} />
