@@ -1,0 +1,25 @@
+Tudu Features
+
+lightmode / darkmode
+
+// Create New Item
+Read Items
+    in order created
+Update Items
+    edit text
+    reorder
+// Delete Items
+
+// Mark items as complete
+// Unmark items as complete
+
+Archive completed items
+Read archived items
+    sorted by date
+Delete archived items
+
+Hosting - Firebase
+Domain - tudu.gq
+    https://www.freenom.com/en/index.html
+UI - React and material-ui
+storage - localstorage
