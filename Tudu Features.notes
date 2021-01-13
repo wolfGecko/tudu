@@ -1,17 +1,18 @@
 Tudu Features
 
 lightmode / darkmode
+    https://material.io/design/color/dark-theme.html#ui-application
 
 // Create New Item
-Read Items
-    in order created
+Read Items and Write Items from and to localstorage
 Update Items
     edit text - maybe not
-    reorder
-        https://www.npmjs.com/package/react-sortable-hoc
+    // reorder
 // Delete Items
+// item complete snackbar
 
 // Mark items as complete
+    store the date it was completed so the archive can access it
 // Unmark items as complete
 
 Archive completed items
@@ -23,4 +24,4 @@ Hosting - Firebase
 Domain - tudu.gq
     https://www.freenom.com/en/index.html
 UI - React and material-ui
-storage - localstorage
+storage - localstorage or cache?

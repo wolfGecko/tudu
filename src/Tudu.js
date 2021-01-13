@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 // undo
 import useUndo from 'use-undo';
+// sortable
+import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+import arrayMove from 'array-move';
 // UI components and styles
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -15,6 +18,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 // stylesheets
 import './Tudu.css';
+// functions
+import { idMaker, displayPrettyDate, getSuccessMessage } from './functions';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -23,16 +28,10 @@ const useStyles = makeStyles((theme) => ({
             width: '25ch',
         },
     },
+    successSnackbar: { backgroundColor: '#4caf50'}
 }));
 
-const idMaker = () => {
-    const chars = '0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM';
-    let id = '';
-    for (let i = 0; i < 9; i++) id += chars[Math.floor(Math.random() * chars.length)]
-    return id;
-}
-
-function Tudu() {
+export function Tudu() {
     const classes = useStyles();
     const [newItem, setNewItem] = useState('');
     const [items, { set: setItems, undo: undoItems }] = useUndo([
@@ -41,14 +40,16 @@ function Tudu() {
         { complete: false, id: "blM6fC67H", name: "Do?" }
     ]);
     const { present: presentItems } = items;
-    const [undoBarOpen, setUndoBarOpen] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarKey, setSnackbarKey] = useState('');
 
     const addNewItem = e => {
         e.preventDefault();
         if (newItem.length > 0) {
             let newItemData = { 'complete': false };
             newItemData.name = newItem;
-            newItemData.id = idMaker();
+            newItemData.id = idMaker(9);
             let newItems = [...presentItems];
             newItems.push(newItemData);
             setItems(newItems);
@@ -56,76 +57,111 @@ function Tudu() {
         }
     }
 
+    const DragHandle = SortableHandle(() => <IconButton aria-label="edit"><DragHandleIcon fontSize="small" /></IconButton>);
+
+    const SortableItem = SortableElement(({ item }) => {
+        return (
+            <div key={item.id} className={item.complete ? 'item complete' : 'item'}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={item.complete}
+                            onChange={() => handleCheck(item.id)}
+                            name={item.name}
+                            color="primary"
+                        />
+                    }
+                    label={item.name}
+                />
+                <span className="item-icons">
+                    <DragHandle />
+                    <IconButton aria-label="delete" onClick={() => deleteItem(item.id)}><DeleteIcon fontSize="small" /></IconButton>
+                </span>
+            </div>
+        );
+    });
+
+    const SortableList = SortableContainer(({ items }) => {
+        return (
+            <div className="items">
+                {items.map((item, index) => (
+                    <SortableItem key={item.id} item={item} index={index} />
+                ))}
+            </div>
+        );
+    });
+
+    const handleSnackbar = (open, type, key) => {
+        if (type === 'success') setSnackbarMessage(getSuccessMessage());
+        if (type === 'undo') setSnackbarMessage('undo');
+        setSnackbarKey(key);
+        setSnackbarOpen(open);
+    }
+
+    const handleSortEnd = ({ oldIndex, newIndex }) => {
+        let items = [...presentItems];
+        let newItems = arrayMove(items, oldIndex, newIndex);
+        setItems(newItems);
+    }
+
     const deleteItem = id => {
         let index = presentItems.findIndex(item => item.id === id);
         let newItems = [...presentItems];
         newItems.splice(index, 1);
         setItems(newItems);
-        setUndoBarOpen(true);
-    }
-
-    const handleItems = () => {
-        return (
-            <div className="items">
-                {presentItems.map(item => {
-                    return (
-                        <div key={item.id} className={item.complete ? 'item complete' : 'item'}>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={item.complete}
-                                        onChange={() => handleCheck(item.id)}
-                                        name={item.name}
-                                        color="primary"
-                                    />
-                                }
-                                label={item.name}
-                            />
-                            <span className="item-icons">
-                                <IconButton aria-label="edit"><DragHandleIcon fontSize="small" /></IconButton>
-                                <IconButton aria-label="delete" onClick={() => deleteItem(item.id)}><DeleteIcon fontSize="small" /></IconButton>
-                            </span>
-                        </div>
-                    )
-                })}
-            </div>
-        );
+        handleSnackbar(true, 'undo', id);
     }
 
     const handleCheck = id => {
         // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
         let index = presentItems.findIndex(item => item.id === id);
         let newItems = [...presentItems];
+        if (newItems[index].complete === false) handleSnackbar(true, 'success', id);
         newItems[index].complete = !newItems[index].complete;
         setItems(newItems);
-        console.log(newItems)
     }
 
-    const handleCloseUndoBar = (event, reason) => {
+    const handleCloseSnackbar = (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-        setUndoBarOpen(false);
+        handleSnackbar(false);
     }
 
     const handleUndoItems = () => {
         undoItems();
-        setUndoBarOpen(false);
+        handleSnackbar(false);
     }
 
-    const undoSnackbar = () => {
+    const snackBar = () => {
+        let message;
+        let undo;
+        let className;
+        if (snackbarMessage === 'undo') {
+            message = 'Item Deleted';
+            undo = true;
+        }
+        else {
+            undo = false;
+            className = classes.successSnackbar;
+            message = snackbarMessage;
+        }
         return <Snackbar
             anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            open={undoBarOpen}
+            open={snackbarOpen}
             autoHideDuration={6000}
-            onClose={handleCloseUndoBar}
-            message="Item Deleted"
+            onClose={handleCloseSnackbar}
+            message={message}
+            key={snackbarKey + snackbarMessage}
+            ContentProps={{"aria-describedby": "message-id", className: className}}
             action={
                 <>
-                    <Button color="secondary" size="small" onClick={handleUndoItems}>
-                        UNDO
-                    </Button>
-                    <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseUndoBar}>
+                    { undo === true &&
+                        <Button color="secondary" size="small" onClick={handleUndoItems}>
+                            UNDO
+                        </Button>
+                    }
+                    <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar}>
                         <CloseIcon fontSize="small" />
                     </IconButton>
                 </>
@@ -133,19 +169,13 @@ function Tudu() {
         />
     }
 
-    const displayDate = () => {
-        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        var today = new Date();
-        return today.toLocaleDateString("en-US", options);
-    }
-
     return (
         <div className="bg">
             <div className="wrapper">
                 <h1>Tudu</h1>
-                <h2>Stupid Simple Todo List</h2>
-                <h3>{displayDate()}</h3>
-                {handleItems()}
+                <div className="title-line"></div>
+                <h3>{displayPrettyDate(new Date())}</h3>
+                <SortableList items={presentItems} useDragHandle={true} onSortEnd={handleSortEnd} />
                 <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
                     <TextField label="New item" onChange={e => setNewItem(e.target.value)} value={newItem} />
                     <br />
@@ -157,7 +187,8 @@ function Tudu() {
                     </Button>
                 </form>
             </div>
-            {undoSnackbar()}
+            <div className="credit">Whipped up with ❤️ by Liam</div>
+            {snackBar()}
         </div>
     );
 }
