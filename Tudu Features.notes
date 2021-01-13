@@ -4,7 +4,9 @@ lightmode / darkmode
     https://material.io/design/color/dark-theme.html#ui-application
 
 // Create New Item
-Read Items and Write Items from and to localstorage
+// Read Items and Write Items from and to IndexedDB
+//     https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Client-side_storage
+//     https://www.smashingmagazine.com/2014/09/building-simple-cross-browser-offline-todo-list-indexeddb-websql/#top
 Update Items
     edit text - maybe not
     // reorder
@@ -12,13 +14,25 @@ Update Items
 // item complete snackbar
 
 // Mark items as complete
-    store the date it was completed so the archive can access it
+    // store the date it was completed so the archive can access it
 // Unmark items as complete
 
 Archive completed items
 Read archived items
     sorted by date
 Delete archived items
+
+null state? ie no items
+    initial null state, e.g. [x] Find the best todo list app on the web
+
+about section
+
+errors
+    on reorder
+        Uncaught TypeError: Cannot read property 'removeChild' of null
+            at react-sortable-hoc.esm.js:946
+        https://github.com/clauderic/react-sortable-hoc/issues/549
+
 
 Hosting - Firebase
 Domain - tudu.gq

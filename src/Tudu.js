@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // undo
 import useUndo from 'use-undo';
 // sortable
@@ -28,26 +28,75 @@ const useStyles = makeStyles((theme) => ({
             width: '25ch',
         },
     },
-    successSnackbar: { backgroundColor: '#4caf50'}
+    successSnackbar: { backgroundColor: '#4caf50' }
 }));
 
 export function Tudu() {
     const classes = useStyles();
     const [newItem, setNewItem] = useState('');
-    const [items, { set: setItems, undo: undoItems }] = useUndo([
-        { complete: false, id: "PMVyujwET", name: "What" },
-        { complete: false, id: "ZaDwlCO4q", name: "It" },
-        { complete: false, id: "blM6fC67H", name: "Do?" }
-    ]);
+    const [items, { set: setItems, undo: undoItems }] = useUndo([]);
     const { present: presentItems } = items;
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarKey, setSnackbarKey] = useState('');
+    const db = useRef(null);
+
+    useEffect(() => {
+        // create indexedDB for client side storage if not already there and read any current data
+        console.log('init DB and read hook')
+        // calls DB init function
+        databaseOpen(() => {
+            // callback to read data
+            const transaction = db.current.transaction(['activeTodos'], 'readonly');
+            const store = transaction.objectStore('activeTodos');
+            const cursorRequest = store.get(1);
+            cursorRequest.onsuccess = function (e) {
+                const result = e.target.result;
+                if (result) setItems(result.data);
+            };
+        });
+
+        function databaseOpen(callback) {
+            // Open a database, specify the name and version (version must be incremented to update the db stucture)
+            const version = 1;
+            const request = indexedDB.open('tuduApp', version);
+            // Run migrations if necessary
+            request.onupgradeneeded = function (e) {
+                db.current = e.target.result;
+                e.target.transaction.onerror = databaseError;
+                db.current.createObjectStore('activeTodos', { keyPath: 'id' });
+            };
+            request.onsuccess = function (e) {
+                db.current = e.target.result;
+                callback();
+            };
+            request.onerror = databaseError;
+        }
+
+        function databaseError(e) { console.error('An IndexedDB error has occurred', e); }
+    }, [setItems]);
+
+    useEffect(() => {
+        // update the single record in the db. this is the items.present array. Pro: this method captures all changes. Con: all the data is in one record, performance may suffer if there are many tasks. 
+        if (db.current) databaseUpdateActiveTodos(items.present);
+
+        function databaseUpdateActiveTodos(data) {
+            const transaction = db.current.transaction(['activeTodos'], 'readwrite');
+            const store = transaction.objectStore('activeTodos');
+            const request = store.put({
+                data: data,
+                id: 1
+            });
+            transaction.oncomplete = function (e) { console.log('data added') };
+            request.onerror = e => console.error('An IndexedDB error has occurred', e);;
+        }
+
+    }, [items]);
 
     const addNewItem = e => {
         e.preventDefault();
         if (newItem.length > 0) {
-            let newItemData = { 'complete': false };
+            let newItemData = { 'complete': false, 'completedTime': 0 };
             newItemData.name = newItem;
             newItemData.id = idMaker(9);
             let newItems = [...presentItems];
@@ -116,7 +165,12 @@ export function Tudu() {
         // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
         let index = presentItems.findIndex(item => item.id === id);
         let newItems = [...presentItems];
-        if (newItems[index].complete === false) handleSnackbar(true, 'success', id);
+        if (newItems[index].complete === false) {
+            handleSnackbar(true, 'success', id);
+            newItems[index].completedTime = Date.now();
+        } else {
+            newItems[index].completedTime = 0;
+        }
         newItems[index].complete = !newItems[index].complete;
         setItems(newItems);
     }
@@ -153,7 +207,7 @@ export function Tudu() {
             onClose={handleCloseSnackbar}
             message={message}
             key={snackbarKey + snackbarMessage}
-            ContentProps={{"aria-describedby": "message-id", className: className}}
+            ContentProps={{ "aria-describedby": "message-id", className: className }}
             action={
                 <>
                     { undo === true &&
