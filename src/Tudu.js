@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+// internal
+import TuduArchive from './TuduArchive';
 // undo
 import useUndo from 'use-undo';
 // sortable
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import arrayMove from 'array-move';
-// UI components and styles
+// MUI components and styles
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
@@ -12,7 +14,8 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Snackbar from '@material-ui/core/Snackbar';
-// icons
+import Collapse from '@material-ui/core/Collapse';
+// MUI icons
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
@@ -34,18 +37,21 @@ const useStyles = makeStyles((theme) => ({
 
 export function Tudu() {
     const classes = useStyles();
-    const [newItem, setNewItem] = useState('');
     const [items, { set: setItems, undo: undoItems }] = useUndo([]);
     const { present: presentItems } = items;
+    const [newItem, setNewItem] = useState('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarKey, setSnackbarKey] = useState('');
+    const [anyCompleted, setAnyCompleted] = useState(false);
+    const [displayArchive, setDisplayArchive] = useState(false);
+
     const db = useRef(null);
 
     useEffect(() => {
         // create indexedDB for client side storage if not already there and read any current data
         console.log('init DB and read hook')
-        // calls DB init function
+        // calls the databaseOpen function below
         databaseOpen(() => {
             // callback to read data
             const transaction = db.current.transaction(['activeTodos'], 'readonly');
@@ -66,6 +72,8 @@ export function Tudu() {
                 db.current = e.target.result;
                 e.target.transaction.onerror = databaseError;
                 db.current.createObjectStore('activeTodos', { keyPath: 'id' });
+                let archiveStore = db.current.createObjectStore('archiveTodos', { keyPath: 'id' });
+                archiveStore.createIndex('date', 'date', { unique: false });
             };
             request.onsuccess = function (e) {
                 db.current = e.target.result;
@@ -78,9 +86,9 @@ export function Tudu() {
     }, [setItems]);
 
     useEffect(() => {
-        // update the single record in the db. this is the items.present array. Pro: this method captures all changes. Con: all the data is in one record, performance may suffer if there are many tasks. 
+        // this hook tracks any changes to items, aka the activeTodos
+        // updates the single record in the db. this is the items.present array. Pro: this method captures all changes. Con: all the data is in one record, performance may suffer if there are many tasks. 
         if (db.current) databaseUpdateActiveTodos(items.present);
-
         function databaseUpdateActiveTodos(data) {
             const transaction = db.current.transaction(['activeTodos'], 'readwrite');
             const store = transaction.objectStore('activeTodos');
@@ -88,10 +96,19 @@ export function Tudu() {
                 data: data,
                 id: 1
             });
-            transaction.oncomplete = function (e) { console.log('data added') };
+            // transaction.oncomplete = function (e) { console.log('data added') };
             request.onerror = e => console.error('An IndexedDB error has occurred', e);;
         }
 
+        // find if any tasks are completed to toggle disable on archive button
+        let anyCompleted = false;
+        for (let i = 0; i < items.present.length; i++) {
+            if (items.present[i].complete === true) {
+                anyCompleted = true;
+                break;
+            }
+        }
+        setAnyCompleted(anyCompleted);
     }, [items]);
 
     const addNewItem = e => {
@@ -188,6 +205,33 @@ export function Tudu() {
         handleSnackbar(false);
     }
 
+    const handleArchive = () => {
+        // console.log(items.present);
+        let toArchive = [];
+        let toActive = [];
+        items.present.forEach(item => {
+            if (item.complete === true) toArchive.push(item);
+            else toActive.push(item);
+        });
+        databaseArchiveTodos(toArchive);
+        setItems(toActive);
+    }
+
+    const databaseArchiveTodos = toArchive => {
+        const transaction = db.current.transaction(['archiveTodos'], 'readwrite');
+        const store = transaction.objectStore('archiveTodos');
+        toArchive.forEach(item => {
+            const request = store.put({
+                id: item.id,
+                name: item.name,
+                date: new Date(item.completedTime),
+                timeStamp: item.completedTime
+            });
+            transaction.oncomplete = function (e) { console.log('record archived') };
+            request.onerror = e => console.error('An IndexedDB error has occurred', e);;
+        })
+    }
+
     const snackBar = () => {
         let message;
         let undo;
@@ -229,15 +273,18 @@ export function Tudu() {
             <div className="wrapper">
                 <h1>Tudu</h1>
                 <div className="title-line"></div>
+                <Collapse in={displayArchive}>
+                    <TuduArchive db={db.current} open={displayArchive} />
+                </Collapse>
                 <h3>{displayPrettyDate(new Date())}</h3>
                 <SortableList items={presentItems} useDragHandle={true} onSortEnd={handleSortEnd} />
                 <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
                     <TextField label="New item" onChange={e => setNewItem(e.target.value)} value={newItem} />
                     <br />
-                    <Button variant="contained" color="primary" type="submit">Add Item</Button>
+                    <Button variant="contained" disableElevation={true} color="primary" type="submit">Add Item</Button>
                     <ButtonGroup variant="outlined" color="primary" aria-label="large outlined primary button group">
-                        <Button>Archive</Button>
-                        <Button>View Archive</Button>
+                        <Button disabled={!anyCompleted} onClick={handleArchive}>Archive</Button>
+                        <Button onClick={() => setDisplayArchive(prev => !prev)}>{displayArchive ? 'Hide Archive' : 'View Archive'}</Button>
                     </ButtonGroup>
                 </form>
             </div>

@@ -17,9 +17,15 @@ Update Items
     // store the date it was completed so the archive can access it
 // Unmark items as complete
 
-Archive completed items
+// Archive completed items
+    Undo
+        snackbar
+        functionality
 Read archived items
-    sorted by date
+    show a week at a time, displayed by day
+        go back six days to midnight local time
+        use .getTime() for unix time
+        get all dates greater than than and less than previous ask
 Delete archived items
 
 null state? ie no items
