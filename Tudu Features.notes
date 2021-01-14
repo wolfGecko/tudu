@@ -27,6 +27,12 @@ null state? ie no items
 
 about section
 
+responsive design
+
+service worker
+
+favicon
+
 errors
     on reorder
         Uncaught TypeError: Cannot read property 'removeChild' of null

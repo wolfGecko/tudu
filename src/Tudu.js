@@ -7,6 +7,7 @@ import arrayMove from 'array-move';
 // UI components and styles
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -25,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     root: {
         '& > *': {
             margin: theme.spacing(1),
-            width: '25ch',
+            // width: '25ch',
         },
     },
     successSnackbar: { backgroundColor: '#4caf50' }
@@ -233,12 +234,11 @@ export function Tudu() {
                 <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
                     <TextField label="New item" onChange={e => setNewItem(e.target.value)} value={newItem} />
                     <br />
-                    <Button variant="contained" color="primary" type="submit">
-                        Add Item
-                    </Button>
-                    <Button variant="outlined" color="primary">
-                        View Archive
-                    </Button>
+                    <Button variant="contained" color="primary" type="submit">Add Item</Button>
+                    <ButtonGroup variant="outlined" color="primary" aria-label="large outlined primary button group">
+                        <Button>Archive</Button>
+                        <Button>View Archive</Button>
+                    </ButtonGroup>
                 </form>
             </div>
             <div className="credit">Whipped up with ❤️ by Liam</div>
