@@ -15,8 +15,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Snackbar from '@material-ui/core/Snackbar';
 import Collapse from '@material-ui/core/Collapse';
-// MUI icons
 import IconButton from '@material-ui/core/IconButton';
+// MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
@@ -56,8 +56,8 @@ export function Tudu() {
             // callback to read data
             const transaction = db.current.transaction(['activeTodos'], 'readonly');
             const store = transaction.objectStore('activeTodos');
-            const cursorRequest = store.get(1);
-            cursorRequest.onsuccess = function (e) {
+            const req = store.get(1);
+            req.onsuccess = function (e) {
                 const result = e.target.result;
                 if (result) setItems(result.data);
             };
