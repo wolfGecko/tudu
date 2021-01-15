@@ -97,7 +97,7 @@ export function Tudu() {
                 id: 1
             });
             // transaction.oncomplete = function (e) { console.log('data added') };
-            request.onerror = e => console.error('An IndexedDB error has occurred', e);;
+            request.onerror = e => console.error('An IndexedDB error has occurred', e);
         }
 
         // find if any tasks are completed to toggle disable on archive button

@@ -18,15 +18,22 @@ Update Items
 // Unmark items as complete
 
 // Archive completed items
-    Undo
+    Undo archive
         snackbar
         functionality
-Read archived items
-    show a week at a time, displayed by day
-        go back six days to midnight local time
-        use .getTime() for unix time
-        get all dates greater than than and less than previous ask
-Delete archived items
+
+Archive
+    // Read archived items
+        pagination
+            show a week at a time, displayed by day
+                index with date object
+            https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/openCursor
+            https://dzone.com/articles/indexeddb-and-date-example
+            https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+    // Delete archived items
+        // undo delete
+
+    loading spinner
 
 null state? ie no items
     initial null state, e.g. [x] Find the best todo list app on the web
@@ -38,6 +45,8 @@ responsive design
 service worker
 
 favicon
+
+scroll to active/bottom button when archive is open?
 
 errors
     on reorder
