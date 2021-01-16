@@ -33,7 +33,7 @@ Archive
     // Delete archived items
         // undo delete
 
-    loading spinner
+    // loading spinner
 
 null state? ie no items
     initial null state, e.g. [x] Find the best todo list app on the web

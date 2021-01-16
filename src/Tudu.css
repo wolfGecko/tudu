@@ -85,3 +85,8 @@ form {
 .items-archive {
     margin-top: 10px;
 }
+
+.loading-archive {
+    margin-top: 20px;
+    /* margin-bottom: -10px; */
+}

@@ -16,6 +16,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Snackbar from '@material-ui/core/Snackbar';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
+import LinearProgress from '@material-ui/core/LinearProgress';
 // MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
@@ -45,6 +46,10 @@ export function Tudu() {
     const [snackbarKey, setSnackbarKey] = useState('');
     const [anyCompleted, setAnyCompleted] = useState(false);
     const [displayArchive, setDisplayArchive] = useState(false);
+    // const [archiveLoaded, setArchiveLoaded] = useState(false);
+    const [requestLoadArchive, setRequestLoadArchive] = useState(false);
+
+    const itemInput = useRef();
 
     const db = useRef(null);
 
@@ -86,6 +91,7 @@ export function Tudu() {
     }, [setItems]);
 
     useEffect(() => {
+        console.log('item change hook')
         // this hook tracks any changes to items, aka the activeTodos
         // updates the single record in the db. this is the items.present array. Pro: this method captures all changes. Con: all the data is in one record, performance may suffer if there are many tasks. 
         if (db.current) databaseUpdateActiveTodos(items.present);
@@ -113,14 +119,16 @@ export function Tudu() {
 
     const addNewItem = e => {
         e.preventDefault();
-        if (newItem.length > 0) {
+        let devName = itemInput.current.children[1].children[0].value;
+        // console.log(devName);
+        if (devName.length > 0) {
             let newItemData = { 'complete': false, 'completedTime': 0 };
-            newItemData.name = newItem;
+            newItemData.name = devName;
             newItemData.id = idMaker(9);
             let newItems = [...presentItems];
             newItems.push(newItemData);
             setItems(newItems);
-            setNewItem('');
+            itemInput.current.children[1].children[0].value = '';
         }
     }
 
@@ -232,6 +240,24 @@ export function Tudu() {
         })
     }
 
+    const handleDisplayArchive = callback => {
+        // relies on displayArchive, requestLoadArchive, and callback from TuduArchive
+        // if callback (aka its loaded) display archive
+        if (callback === true) {
+            setDisplayArchive(true);
+            setRequestLoadArchive(false);
+        }
+        // if its not a callback and its not displayed, request load
+        if (callback === false && displayArchive === false) {
+            setRequestLoadArchive(true);
+        }
+        // if displayed and not callback, hide and reset load request
+        if (callback === false && displayArchive === true) {
+            setDisplayArchive(false);
+            setRequestLoadArchive(false);
+        }
+    }
+
     const snackBar = () => {
         let message;
         let undo;
@@ -274,17 +300,21 @@ export function Tudu() {
                 <h1>Tudu</h1>
                 <div className="title-line"></div>
                 <Collapse in={displayArchive}>
-                    <TuduArchive db={db.current} open={displayArchive} />
+                    <TuduArchive db={db.current} open={displayArchive} requestLoad={requestLoadArchive} loadedCallback={() => handleDisplayArchive(true)} />
+                </Collapse>
+                <Collapse in={requestLoadArchive}>
+                    <LinearProgress className="loading-archive" />
                 </Collapse>
                 <h3>{displayPrettyDate(new Date())}</h3>
                 <SortableList items={presentItems} useDragHandle={true} onSortEnd={handleSortEnd} />
                 <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
-                    <TextField label="New item" onChange={e => setNewItem(e.target.value)} value={newItem} />
+                    <TextField label="New item" ref={itemInput} />
+                    {/* <TextField label="New item" onChange={e => setNewItem(e.target.value)} value={target.value} /> */}
                     <br />
                     <Button variant="contained" disableElevation={true} color="primary" type="submit">Add Item</Button>
                     <ButtonGroup variant="outlined" color="primary" aria-label="large outlined primary button group">
                         <Button disabled={!anyCompleted} onClick={handleArchive}>Archive</Button>
-                        <Button onClick={() => setDisplayArchive(prev => !prev)}>{displayArchive ? 'Hide Archive' : 'View Archive'}</Button>
+                        <Button onClick={() => handleDisplayArchive(false)}>{displayArchive ? 'Hide Archive' : 'View Archive'}</Button>
                     </ButtonGroup>
                 </form>
             </div>

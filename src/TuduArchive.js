@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // undo
 import useUndo from 'use-undo';
 // MUI components and styles
@@ -21,7 +21,14 @@ export function TuduArchive(props) {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [deletedItem, setDeletedItem] = useState({});
     const db = props.db;
-
+    
+    useEffect(() => {
+        console.log('archive effect')
+        // resets the itemsLoaded Boolean causing a reload everytime archive is opened
+        if (props.open === false && itemsLoaded === true) {
+            setItemsLoaded(false);
+        } 
+    }, [props.open, items, itemsLoaded]);
 
     const readArchive = () => {
         if (db) {
@@ -37,15 +44,15 @@ export function TuduArchive(props) {
                     cursor.continue();
                 } else {
                     setItems(updatedItems);
+                    setItemsLoaded(true);
+                    props.loadedCallback();
                 }
             }
         }
     }
 
-    if (props.open === true && itemsLoaded === false) {
+    if (props.requestLoad === true && itemsLoaded === false) {
         readArchive();
-        setItemsLoaded(true);
-        console.log('loadItems')
     }
 
     const deleteItem = item => {
@@ -53,7 +60,7 @@ export function TuduArchive(props) {
         const transaction = db.transaction(['archiveTodos'], 'readwrite');
         const store = transaction.objectStore('archiveTodos');
         const req = store.delete(item.id);
-        req.onerror = err => {console.log('error', err)};
+        req.onerror = err => { console.log('error', err) };
 
         // remove item from state / display
         let updatedItems = [...presentItems];
@@ -132,7 +139,7 @@ export function TuduArchive(props) {
     }
 
     return (
-        <div {...props} className="items-archive">
+        <div className="items-archive">
             {displayItems()}
             {snackBar()}
         </div>
