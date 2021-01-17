@@ -7,6 +7,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Snackbar from '@material-ui/core/Snackbar';
+import Collapse from '@material-ui/core/Collapse';
+import LinearProgress from '@material-ui/core/LinearProgress';
 // MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
@@ -21,16 +23,10 @@ export function TuduArchive(props) {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [deletedItem, setDeletedItem] = useState({});
     const db = props.db;
-    
-    useEffect(() => {
-        console.log('archive effect')
-        // resets the itemsLoaded Boolean causing a reload everytime archive is opened
-        if (props.open === false && itemsLoaded === true) {
-            setItemsLoaded(false);
-        } 
-    }, [props.open, items, itemsLoaded]);
 
-    const readArchive = () => {
+    useEffect(() => {
+        // 'onMount' hook
+        // read archive
         if (db) {
             const transaction = db.transaction(['archiveTodos'], 'readonly');
             const store = transaction.objectStore('archiveTodos');
@@ -45,15 +41,18 @@ export function TuduArchive(props) {
                 } else {
                     setItems(updatedItems);
                     setItemsLoaded(true);
-                    props.loadedCallback();
                 }
             }
         }
-    }
+    }, [db, setItems]);
 
-    if (props.requestLoad === true && itemsLoaded === false) {
-        readArchive();
-    }
+    useEffect(() => {
+        // closes archive after animate out. timeout is so that the transition completes before this comp is unmounted
+        if (props.requestCloseArchive === true) {
+            setItemsLoaded(false);
+            setTimeout(() => { props.closeArchiveCallback() }, 400)
+        }
+    }, [props])
 
     const deleteItem = item => {
         // delete item from store
@@ -140,7 +139,12 @@ export function TuduArchive(props) {
 
     return (
         <div className="items-archive">
-            {displayItems()}
+            { itemsLoaded === false && props.requestCloseArchive === false &&
+                <LinearProgress />
+            }
+            <Collapse in={itemsLoaded}>
+                {displayItems()}
+            </Collapse>
             {snackBar()}
         </div>
     )

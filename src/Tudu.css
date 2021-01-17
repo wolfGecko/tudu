@@ -46,6 +46,7 @@ h1 {
 
 .title-line {
     border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
     width: 100px;
 }
 
@@ -53,7 +54,7 @@ h3 {
     color: #444;
     font-size: 14px;
     font-weight: normal;
-    margin-top: 15px;
+    margin-top: 0;
 }
 
 form {
@@ -82,11 +83,10 @@ form {
     color: #444;
 }
 
-.items-archive {
-    margin-top: 10px;
-}
-
 .loading-archive {
     margin-top: 20px;
-    /* margin-bottom: -10px; */
+}
+
+.MuiLinearProgress-root {
+    margin-bottom: 5px;
 }
