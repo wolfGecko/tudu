@@ -10,8 +10,8 @@ html, body {
 
 .bg {
     background-color: #f9f4f5;
-    background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(240,240,240,1) 42%);
-    /* background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(226,226,226,1) 42%, rgba(240,240,240,1) 52%); */
+    /* background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(240,240,240,1) 42%); */
+    background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(226,226,226,1) 42%, rgba(240,240,240,1) 52%);
     /* background: linear-gradient(-4deg, rgba(56,56,56,1) 42%, rgba(51,51,51,1) 42%); */
     min-height: 100vh;
     padding: 0 10px;
@@ -89,4 +89,8 @@ form {
 
 .MuiLinearProgress-root {
     margin-bottom: 5px;
+}
+
+.MuiSnackbarContent-root.success-snackbar {
+    background-color: #4caf50;
 }

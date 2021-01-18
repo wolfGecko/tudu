@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 // internal
 import TuduArchive from './TuduArchive';
+import SnackbarHandler from './SnackbarHandler';
 // undo
 import useUndo from 'use-undo';
 // sortable
@@ -13,11 +14,9 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 // MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
-import CloseIcon from '@material-ui/icons/Close';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 // stylesheets
 import './Tudu.css';
@@ -31,7 +30,6 @@ const useStyles = makeStyles((theme) => ({
             // width: '25ch',
         },
     },
-    successSnackbar: { backgroundColor: '#4caf50' }
 }));
 
 export function Tudu() {
@@ -39,9 +37,14 @@ export function Tudu() {
     const [items, { set: setItems, undo: undoItems }] = useUndo([]);
     const { present: presentItems } = items;
     // const [newItem, setNewItem] = useState('');
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [snackbarKey, setSnackbarKey] = useState('');
+    const [snackbarData, setSnackbarData] = useState({
+        className: '',
+        displayUndoBtn: true,
+        key: '',
+        message: '',
+        open: false,
+        undoFunction: ''
+    });
     const [anyCompleted, setAnyCompleted] = useState(false);
     const [displayArchive, setDisplayArchive] = useState(false);
     const [requestCloseArchive, setRequestCloseArchive] = useState(false);
@@ -52,7 +55,7 @@ export function Tudu() {
 
     useEffect(() => {
         // create indexedDB for client side storage if not already there and read any current data
-        console.log('init DB and read hook')
+        // console.log('init DB and read hook')
         // calls the databaseOpen function below
         databaseOpen(() => {
             // callback to read data
@@ -162,11 +165,15 @@ export function Tudu() {
         );
     });
 
-    const handleSnackbar = (open, type, key) => {
-        if (type === 'success') setSnackbarMessage(getSuccessMessage());
-        if (type === 'undo') setSnackbarMessage('undo');
-        setSnackbarKey(key);
-        setSnackbarOpen(open);
+    const handleSnackbar = (open, className, displayUndoBtn, key, message, undoFunction) => {
+        setSnackbarData({
+            className,
+            displayUndoBtn,
+            key,
+            message,
+            open,
+            undoFunction,
+        });
     }
 
     const handleSortEnd = ({ oldIndex, newIndex }) => {
@@ -180,16 +187,17 @@ export function Tudu() {
         let newItems = [...presentItems];
         newItems.splice(index, 1);
         setItems(newItems);
-        handleSnackbar(true, 'undo', id);
+        handleSnackbar(true, '', true, id, 'Item Deleted', handleUndoItems);
     }
 
     const handleCheck = id => {
         // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
         let index = presentItems.findIndex(item => item.id === id);
         let newItems = [...presentItems];
+        const now = Date.now();
         if (newItems[index].complete === false) {
-            handleSnackbar(true, 'success', id);
-            newItems[index].completedTime = Date.now();
+            handleSnackbar(true, 'success-snackbar', false, id + now, getSuccessMessage(), '');
+            newItems[index].completedTime = now;
         } else {
             newItems[index].completedTime = 0;
         }
@@ -201,16 +209,18 @@ export function Tudu() {
         if (reason === 'clickaway') {
             return;
         }
-        handleSnackbar(false);
+        handleSnackbar(false, '', true, '', '', '');
     }
 
     const handleUndoItems = () => {
         undoItems();
-        handleSnackbar(false);
+        handleSnackbar(false, '', true, '', '', '');
     }
 
     const handleArchive = () => {
-        // console.log(items.present);
+        // this archives checked items
+        // it closes the archive if open so that newly archived items will appear when it is reopened
+        if (displayArchive === true) handleDisplayArchive();
         let toArchive = [];
         let toActive = [];
         items.present.forEach(item => {
@@ -231,53 +241,34 @@ export function Tudu() {
                 date: new Date(item.completedTime),
                 timeStamp: item.completedTime
             });
-            transaction.oncomplete = function (e) { console.log('record archived') };
+            transaction.oncomplete = function (e) {
+                handleSnackbar(true, '', true, toArchive[0].id, `${toArchive.length} Item(s) Archived`, () => handleUndoArchive(toArchive));
+            };
             request.onerror = e => console.error('An IndexedDB error has occurred', e);;
-        })
+        });
+    }
+
+    const handleUndoArchive = fromArchive => {
+        const transaction = db.current.transaction(['archiveTodos'], 'readwrite');
+        const store = transaction.objectStore('archiveTodos');
+        fromArchive.forEach(item => {
+            const request = store.delete(item.id);
+            transaction.oncomplete = function (e) { console.log('records removed from archive') };
+            request.onerror = e => console.error('An IndexedDB error has occurred', e);;
+        });
+        undoItems();
+        handleSnackbar(false, '', true, '', '', '');
     }
 
     const handleDisplayArchive = () => {
-        if (displayArchive === false) setDisplayArchive(true);
+        if (displayArchive === false) {
+            setDisplayArchive(true);
+            handleSnackbar(false, '', true, '', '', '');
+        }
         if (displayArchive === true) {
-            // pass a prop to animate out before a callback unmounts? 
+            // passes a prop to animate out before a callback unmounts 
             setRequestCloseArchive(true);
         }
-    }
-
-    const snackBar = () => {
-        let message;
-        let undo;
-        let className;
-        if (snackbarMessage === 'undo') {
-            message = 'Item Deleted';
-            undo = true;
-        }
-        else {
-            undo = false;
-            className = classes.successSnackbar;
-            message = snackbarMessage;
-        }
-        return <Snackbar
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            open={snackbarOpen}
-            autoHideDuration={6000}
-            onClose={handleCloseSnackbar}
-            message={message}
-            key={snackbarKey + snackbarMessage}
-            ContentProps={{ "aria-describedby": "message-id", className: className }}
-            action={
-                <>
-                    { undo === true &&
-                        <Button color="secondary" size="small" onClick={handleUndoItems}>
-                            UNDO
-                        </Button>
-                    }
-                    <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar}>
-                        <CloseIcon fontSize="small" />
-                    </IconButton>
-                </>
-            }
-        />
     }
 
     return (
@@ -285,8 +276,8 @@ export function Tudu() {
             <div className="wrapper">
                 <h1>Tudu</h1>
                 <div className="title-line"></div>
-                { displayArchive === true && 
-                    <TuduArchive db={db.current} requestCloseArchive={requestCloseArchive} closeArchiveCallback={() => { setDisplayArchive(false); setRequestCloseArchive(false) }} />
+                {displayArchive === true &&
+                    <TuduArchive db={db.current} handleSnackbar={handleSnackbar} requestCloseArchive={requestCloseArchive} closeArchiveCallback={() => { setDisplayArchive(false); setRequestCloseArchive(false) }} />
                 }
                 <h3>{displayPrettyDate(new Date())}</h3>
                 <SortableList items={presentItems} useDragHandle={true} onSortEnd={handleSortEnd} />
@@ -301,8 +292,8 @@ export function Tudu() {
                     </ButtonGroup>
                 </form>
             </div>
-            <div className="credit">Whipped up with 💀 by Liam</div>
-            {snackBar()}
+            <div className="credit">🖥️ by Liam</div>
+            <SnackbarHandler data={snackbarData} onClose={handleCloseSnackbar} />
         </div>
     );
 }

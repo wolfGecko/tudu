@@ -4,14 +4,11 @@ import useUndo from 'use-undo';
 // MUI components and styles
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
 import Collapse from '@material-ui/core/Collapse';
 import LinearProgress from '@material-ui/core/LinearProgress';
 // MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
-import CloseIcon from '@material-ui/icons/Close';
 
 // stylesheet
 import './Tudu.css';
@@ -20,12 +17,9 @@ export function TuduArchive(props) {
     const [items, { set: setItems, undo: undoItems }] = useUndo([]);
     const { present: presentItems } = items;
     const [itemsLoaded, setItemsLoaded] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [deletedItem, setDeletedItem] = useState({});
     const db = props.db;
 
     useEffect(() => {
-        // 'onMount' hook
         // read archive
         if (db) {
             const transaction = db.transaction(['archiveTodos'], 'readonly');
@@ -52,9 +46,9 @@ export function TuduArchive(props) {
             setItemsLoaded(false);
             setTimeout(() => { props.closeArchiveCallback() }, 400)
         }
-    }, [props])
+    }, [props]);
 
-    const deleteItem = item => {
+    const handleDeleteItem = item => {
         // delete item from store
         const transaction = db.transaction(['archiveTodos'], 'readwrite');
         const store = transaction.objectStore('archiveTodos');
@@ -70,13 +64,29 @@ export function TuduArchive(props) {
             }
         }
         setItems(updatedItems);
-        setDeletedItem(item);
-        setSnackbarOpen(true);
+        props.handleSnackbar(true, '', true, item.id, 'Item Permanently Deleted', () => handleUndoDelete(item));
+    }
+
+    const handleUndoDelete = deletedItem => {
+        // rewrites the item in the store and calls undoItems to restore the state
+        // does this via the handleSnackbar callback function from Tudu
+        props.handleSnackbar(false, '', true, '', '', '');
+        const transaction = db.transaction(['archiveTodos'], 'readwrite');
+        const store = transaction.objectStore('archiveTodos');
+        const req = store.put({
+            id: deletedItem.id,
+            date: deletedItem.date,
+            name: deletedItem.name,
+            timeStamp: deletedItem.timeStamp
+        });
+        req.onerror = e => console.error('An IndexedDB error has occurred', e);
+        // req.oncomplete = () => { setDeletedItem({}) };
+        undoItems();
     }
 
     const displayItems = () => {
         return presentItems.map(item => (
-            <div key={item.id} className={'item archive'}>
+            <div key={item.id} className="item archive">
                 <FormControlLabel
                     control={
                         <Checkbox
@@ -88,53 +98,10 @@ export function TuduArchive(props) {
                     label={item.name}
                 />
                 <span className="item-icons">
-                    <IconButton aria-label="delete" onClick={() => deleteItem(item)}><DeleteIcon fontSize="small" /></IconButton>
+                    <IconButton aria-label="delete" onClick={() => handleDeleteItem(item)}><DeleteIcon fontSize="small" /></IconButton>
                 </span>
             </div>
         ))
-    }
-
-    const handleUndoDelete = () => {
-        setSnackbarOpen(false);
-        const transaction = db.transaction(['archiveTodos'], 'readwrite');
-        const store = transaction.objectStore('archiveTodos');
-        const req = store.put({
-            id: deletedItem.id,
-            date: deletedItem.date,
-            name: deletedItem.name,
-            timeStamp: deletedItem.timeStamp
-        });
-        req.onerror = e => console.error('An IndexedDB error has occurred', e);
-        req.oncomplete = () => { setDeletedItem({}) };
-        undoItems();
-    }
-
-    const handleCloseSnackbar = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setSnackbarOpen(false);
-    }
-
-    const snackBar = () => {
-        return <Snackbar
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            open={snackbarOpen}
-            autoHideDuration={6000}
-            onClose={handleCloseSnackbar}
-            message="Item Permanently Deleted"
-            key={deletedItem ? deletedItem.id : ''}
-            action={
-                <>
-                    <Button color="secondary" size="small" onClick={handleUndoDelete}>
-                        UNDO
-                        </Button>
-                    <IconButton size="small" aria-label="close" color="inherit" onClick={handleCloseSnackbar}>
-                        <CloseIcon fontSize="small" />
-                    </IconButton>
-                </>
-            }
-        />
     }
 
     return (
@@ -145,7 +112,6 @@ export function TuduArchive(props) {
             <Collapse in={itemsLoaded}>
                 {displayItems()}
             </Collapse>
-            {snackBar()}
         </div>
     )
 }

@@ -1,28 +1,32 @@
 Tudu Features
 
-lightmode / darkmode
-    https://material.io/design/color/dark-theme.html#ui-application
-
-// Create New Item
-// Read Items and Write Items from and to IndexedDB
-//     https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Client-side_storage
-//     https://www.smashingmagazine.com/2014/09/building-simple-cross-browser-offline-todo-list-indexeddb-websql/#top
-Update Items
-    edit text - maybe not
-    // reorder
-// Delete Items
-// item complete snackbar
-
-// Mark items as complete
-    // store the date it was completed so the archive can access it
-// Unmark items as complete
-
-// Archive completed items
-    Undo archive
-        snackbar
-        functionality
-
+Tudu
+    lightmode / darkmode
+            https://material.io/design/color/dark-theme.html#ui-application
+    null state? ie no items
+        initial null state, e.g. [x] Find the best todo list app on the web
+    about section
+    responsive design
+    MUI text input label doesnt reset when value is manually reset for uncontrolled input 
+    Update Items
+        edit text - maybe not
+        // reorder
+    // Create New Item
+    // Read Items and Write Items from and to IndexedDB
+    //     https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Client-side_storage
+    //     https://www.smashingmagazine.com/2014/09/building-simple-cross-browser-offline-todo-list-indexeddb-websql/#top
+    // Delete Items
+    // Mark items as complete
+        // item complete snackbar
+        // store the date it was completed so the archive can access it
+        // Unmark items as complete
 Archive
+    scroll to active/bottom button when archive is open?
+    null state
+    // Archive completed items
+    // Undo archive
+        // snackbar
+        // functionality
     // Read archived items
         pagination
             show a week at a time, displayed by day
@@ -32,21 +36,60 @@ Archive
             https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
     // Delete archived items
         // undo delete
-
     // loading spinner
+    // archive new while archive is open
 
-null state? ie no items
-    initial null state, e.g. [x] Find the best todo list app on the web
+// Snackbar --done
+    // Needs
+    //     open boolean,
+    //     message string,
+    //     key string,
+    //     display undo btn boolean,
+    //     undo btn function,
+    //     background color
+    // Types
+    //     task complete
+    //         open boolean:
+    //         message string: getSuccessMessage()
+    //         key string: id + Date.now()? or + message
+    //         display undo btn boolean: false
+    //         undo btn function: NA
+    //         background color: success green
+    //     delete item
+    //         open boolean:
+    //         message string: Item Deleted
+    //         key string: id
+    //         display undo btn boolean: true
+    //         undo btn function: undoItems() in Tudu
+    //         background color: default
+    //     delete archived item
+    //         open boolean:
+    //         message string: Item Perm Deleted
+    //         key string: id
+    //         display undo btn boolean: true
+    //         undo btn function: undoItems() in TuduArchive
+    //         background color: default
+    //     items archived
+    //         open boolean:
+    //         message string: Item(s) Archived
+    //         key string: id[0]
+    //         display undo btn boolean: true
+    //         undo btn function: undoArchive() in Tudu
+    //         background color: default
 
-about section
+Housekeeping
+    service worker
+    favicon
 
-responsive design
+Performance
+    Seems slow when state is holding lots of data
+        is this made worse by undo?
 
-service worker
-
-favicon
-
-scroll to active/bottom button when archive is open?
+Bugs
+    // TuduArchive snackbar and Tudu snackbar can be open at the same time and overlap each other.
+        // make a single snackbar comp? --done, its beautiful
+    // had some weirdness with deletedItem being one behind the current value.
+    // it was because i was passing the value from TuduArchive to Tudu to SnackbarHandler where it was executed. it wasnt getting the value from TuduArchive in real time when the undo button was clicked. solved by sending the item itself up the chain instead of saving it in state
 
 errors
     on reorder
@@ -59,4 +102,4 @@ Hosting - Firebase
 Domain - tudu.gq
     https://www.freenom.com/en/index.html
 UI - React and material-ui
-storage - localstorage or cache?
+storage - IndexedDB
