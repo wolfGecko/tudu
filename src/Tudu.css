@@ -40,7 +40,7 @@ html, body {
 }
 
 h1 {
-    margin: 10px 0 5px 0;
+    margin: 0 0 5px 0;
     font-weight: 100;
 }
 
@@ -67,6 +67,15 @@ form {
     justify-content: space-between;
     margin-bottom: 5px;
     width: 100%;
+    word-break: break-word;
+}
+
+.item.item.archive > label > .MuiTypography-root {
+    cursor: text;
+}
+
+.MuiFormControlLabel-root.Mui-disabled .MuiButtonBase-root {
+    color: rgba(63, 81, 181, .5);
 }
 
 .item.complete {
@@ -75,8 +84,9 @@ form {
 
 .item-icons {
     display: inline-block;
-    margin-left: 10px;
     white-space: nowrap;
+    margin-right: -15px;
+
 }
 
 .item.archive .MuiFormControlLabel-label.Mui-disabled {
@@ -94,3 +104,54 @@ form {
 .MuiSnackbarContent-root.success-snackbar {
     background-color: #4caf50;
 }
+
+@media only screen and (max-width: 500px) {
+    .bg {
+        background-color: rgba(248,248,248,1);
+        background-image: none;
+        align-items: flex-start;
+        justify-content: space-between;
+        overflow: hidden;
+    }
+    
+    h1 {
+        margin-top: 10px;
+        font-size: 24px;
+        font-weight: 500;
+    }
+
+    .title-line {
+        width: 100%;
+    }
+
+    .credit {
+        margin-bottom: 10px;
+    }
+
+    .wrapper {
+        margin-top: 0;
+        padding: 0 0 0 0;
+        border-color: red;
+        border: none;
+        background: 0;
+    }
+
+    .item .MuiIconButton-root {
+        padding: 8px;
+    }
+
+    .item > label > .MuiTypography-root {
+        line-height: 1.1;
+    }
+
+    .item {
+        margin-bottom: 10px;
+    }
+
+    .item .item-icons {
+        margin-left: -16px;
+        margin-right: -12px;
+    }
+    
+    
+  }

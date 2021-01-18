@@ -6,7 +6,7 @@ Tudu
     null state? ie no items
         initial null state, e.g. [x] Find the best todo list app on the web
     about section
-    responsive design
+    // responsive design
     MUI text input label doesnt reset when value is manually reset for uncontrolled input 
     Update Items
         edit text - maybe not
@@ -30,6 +30,11 @@ Archive
     // Read archived items
         pagination
             show a week at a time, displayed by day
+                earlier today
+                yesterday
+                Friday
+                etc.
+                Monday
                 index with date object
             https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/openCursor
             https://dzone.com/articles/indexeddb-and-date-example

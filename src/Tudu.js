@@ -15,6 +15,7 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
+import Link from '@material-ui/core/Link';
 // MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
@@ -292,7 +293,7 @@ export function Tudu() {
                     </ButtonGroup>
                 </form>
             </div>
-            <div className="credit">🖥️ by Liam</div>
+            <div className="credit">🖥️ by <Link href="https://liaminnis.com" color="primary" target="_blank" rel="noopener noreferrer">Liam</Link></div>
             <SnackbarHandler data={snackbarData} onClose={handleCloseSnackbar} />
         </div>
     );
