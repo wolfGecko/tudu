@@ -28,9 +28,14 @@ html, body {
     background-color: #f8f8f8;
     /* background-color: #333333; */
     padding: 20px 40px;
-    max-width: 600px;
+    max-width: 640px;
     width: 100%;
     margin-top: 20px;
+}
+
+.dark-theme-toggle {
+    float: right;
+    margin-right: -15px;
 }
 
 .credit {
@@ -64,8 +69,8 @@ form {
 .item {
     align-items: center;
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
+    /* justify-content: space-between; */
+    margin-bottom: 10px;
     width: 100%;
     word-break: break-word;
 }
@@ -78,6 +83,10 @@ form {
     color: rgba(63, 81, 181, .5);
 }
 
+.item .MuiFormControlLabel-root {
+    margin-right: 5px;
+}
+
 .item.complete {
     text-decoration: line-through;
 }
@@ -86,7 +95,24 @@ form {
     display: inline-block;
     white-space: nowrap;
     margin-right: -15px;
+    margin-left: auto;
+}
 
+.horizontal-collapse.MuiCollapse-container {
+    width: 0px;
+    transition: width 3s;
+    transition-property: width;
+    display: inline-flex;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.horizontal-collapse.MuiCollapse-entered {
+    width: 100%
+}
+
+.horizontal-collapse.MuiCollapse-hidden {
+    width: 0px
 }
 
 .item.archive .MuiFormControlLabel-label.Mui-disabled {
@@ -103,6 +129,10 @@ form {
 
 .MuiSnackbarContent-root.success-snackbar {
     background-color: #4caf50;
+}
+
+.item > label > .MuiTypography-root {
+    line-height: 1.2;
 }
 
 @media only screen and (max-width: 500px) {
@@ -149,7 +179,7 @@ form {
     }
 
     .item .item-icons {
-        margin-left: -16px;
+        /* margin-left: -16px; */
         margin-right: -12px;
     }
     

@@ -19,6 +19,9 @@ import Link from '@material-ui/core/Link';
 // MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
+import EditIcon from '@material-ui/icons/Edit';
+import Brightness4Icon from '@material-ui/icons/Brightness4';
+import BrightnessHighIcon from '@material-ui/icons/BrightnessHigh';
 // stylesheets
 import './Tudu.css';
 // functions
@@ -148,6 +151,7 @@ export function Tudu() {
                     }
                     label={item.name}
                 />
+                { item.complete === false && <IconButton aria-label="edit" className="item-edit-btn" onClick={() => console.log(item.id)}><EditIcon fontSize="small" /></IconButton>}
                 <span className="item-icons">
                     <DragHandle />
                     <IconButton aria-label="delete" onClick={() => deleteItem(item.id)}><DeleteIcon fontSize="small" /></IconButton>
@@ -275,6 +279,7 @@ export function Tudu() {
     return (
         <div className="bg">
             <div className="wrapper">
+                <IconButton aria-label="darktheme" color="primary" className="dark-theme-toggle"><Brightness4Icon fontSize="small" /></IconButton>
                 <h1>Tudu</h1>
                 <div className="title-line"></div>
                 {displayArchive === true &&
