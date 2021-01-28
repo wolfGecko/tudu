@@ -33,6 +33,37 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+const DragHandle = SortableHandle(() => <IconButton aria-label="reorder"><DragHandleIcon fontSize="small" /></IconButton>);
+
+const SortableItem = SortableElement(({ item, item_index, handleCheck, handleEdit, deleteItem }) => {
+    return (
+        <div key={item.id} className={item.complete ? 'item complete active' : 'item active'}>
+            <Checkbox
+                id={item.id}
+                checked={item.complete}
+                onChange={() => handleCheck(item.id, item_index)}
+                name={item.name}
+                color="primary"
+            />
+            <span key={item.id} contentEditable={item.complete ? false : true} onBlur={(e) => handleEdit(e, item_index)} suppressContentEditableWarning={true} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}>{item.name}</span>
+            <span className="item-icons">
+                <DragHandle />
+                <IconButton aria-label="delete" onClick={() => deleteItem(item.id, item_index)}><DeleteIcon fontSize="small" /></IconButton>
+            </span>
+        </div>
+    );
+});
+
+const SortableList = SortableContainer(({ items, handleCheck, handleEdit, deleteItem }) => {
+    return (
+        <div className="items">
+            {items.map((item, index) => (
+                <SortableItem key={item.id} item={item} item_index={index} index={index} handleCheck={handleCheck} handleEdit={handleEdit} deleteItem={deleteItem} />
+            ))}
+        </div>
+    );
+});
+
 export function Tudu() {
     const classes = useStyles();
     const [items, { set: setItems, undo: undoItems }] = useUndo([]);
@@ -92,7 +123,7 @@ export function Tudu() {
 
     useEffect(() => {
         // this hook tracks any changes to items, aka the activeTodos
-        // updates the single record in the db. this is the items.present array. Pro: this method captures all changes. Con: all the data is in one record, performance may suffer if there are many tasks. 
+        // updates the single record in the db. this is the items.present array. Pro: this method captures all changes. Con: all the data is in one record, performance may suffer if there are many tasks.
         if (db.current) databaseUpdateActiveTodos(items.present);
         function databaseUpdateActiveTodos(data) {
             const transaction = db.current.transaction(['activeTodos'], 'readwrite');
@@ -129,37 +160,6 @@ export function Tudu() {
             itemInput.current.children[1].children[0].value = '';
         }
     }
-
-    const DragHandle = SortableHandle(() => <IconButton aria-label="reorder"><DragHandleIcon fontSize="small" /></IconButton>);
-
-    const SortableItem = SortableElement(({ item, item_index }) => {
-        return (
-            <div key={item.id} className={item.complete ? 'item complete active' : 'item active'}>
-                <Checkbox
-                    id={item.id}
-                    checked={item.complete}
-                    onChange={() => handleCheck(item.id, item_index)}
-                    name={item.name}
-                    color="primary"
-                />
-                <span key={item.id} contentEditable={item.complete ? false : true} onBlur={(e) => handleEdit(e, item_index)} suppressContentEditableWarning={true} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}>{item.name}</span>
-                <span className="item-icons">
-                    <DragHandle />
-                    <IconButton aria-label="delete" onClick={() => deleteItem(item.id, item_index)}><DeleteIcon fontSize="small" /></IconButton>
-                </span>
-            </div>
-        );
-    });
-
-    const SortableList = SortableContainer(({ items }) => {
-        return (
-            <div className="items">
-                {items.map((item, index) => (
-                    <SortableItem key={item.id} item={item} item_index={index} index={index} />
-                ))}
-            </div>
-        );
-    });
 
     const handleSnackbar = (open, className, displayUndoBtn, key, message, undoFunction) => {
         setSnackbarData({
@@ -281,7 +281,7 @@ export function Tudu() {
                     <TuduArchive db={db.current} handleSnackbar={handleSnackbar} requestCloseArchive={requestCloseArchive} closeArchiveCallback={() => { setDisplayArchive(false); setRequestCloseArchive(false) }} />
                 }
                 <h3>{displayPrettyDate(new Date())}</h3>
-                <SortableList items={presentItems} useDragHandle={true} onSortEnd={handleSortEnd} />
+                <SortableList items={presentItems} useDragHandle={true} handleCheck={handleCheck} handleEdit={handleEdit} deleteItem={deleteItem} onSortEnd={handleSortEnd} />
                 <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
                     <TextField label="New item" ref={itemInput} />
                     <br />
