@@ -12,16 +12,14 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Link from '@material-ui/core/Link';
 // MUI icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
-import EditIcon from '@material-ui/icons/Edit';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
-import BrightnessHighIcon from '@material-ui/icons/BrightnessHigh';
+// import BrightnessHighIcon from '@material-ui/icons/BrightnessHigh';
 // stylesheets
 import './Tudu.css';
 // functions
@@ -31,8 +29,7 @@ const useStyles = makeStyles((theme) => ({
     root: {
         '& > *': {
             margin: theme.spacing(1),
-            // width: '25ch',
-        },
+        }
     },
 }));
 
@@ -40,7 +37,6 @@ export function Tudu() {
     const classes = useStyles();
     const [items, { set: setItems, undo: undoItems }] = useUndo([]);
     const { present: presentItems } = items;
-    // const [newItem, setNewItem] = useState('');
     const [snackbarData, setSnackbarData] = useState({
         className: '',
         displayUndoBtn: true,
@@ -123,7 +119,6 @@ export function Tudu() {
     const addNewItem = e => {
         e.preventDefault();
         let devName = itemInput.current.children[1].children[0].value;
-        // console.log(devName);
         if (devName.length > 0) {
             let newItemData = { 'complete': false, 'completedTime': 0 };
             newItemData.name = devName;
@@ -135,26 +130,22 @@ export function Tudu() {
         }
     }
 
-    const DragHandle = SortableHandle(() => <IconButton aria-label="edit"><DragHandleIcon fontSize="small" /></IconButton>);
+    const DragHandle = SortableHandle(() => <IconButton aria-label="reorder"><DragHandleIcon fontSize="small" /></IconButton>);
 
-    const SortableItem = SortableElement(({ item }) => {
+    const SortableItem = SortableElement(({ item, item_index }) => {
         return (
-            <div key={item.id} className={item.complete ? 'item complete' : 'item'}>
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={item.complete}
-                            onChange={() => handleCheck(item.id)}
-                            name={item.name}
-                            color="primary"
-                        />
-                    }
-                    label={item.name}
+            <div key={item.id} className={item.complete ? 'item complete active' : 'item active'}>
+                <Checkbox
+                    id={item.id}
+                    checked={item.complete}
+                    onChange={() => handleCheck(item.id, item_index)}
+                    name={item.name}
+                    color="primary"
                 />
-                { item.complete === false && <IconButton aria-label="edit" className="item-edit-btn" onClick={() => console.log(item.id)}><EditIcon fontSize="small" /></IconButton>}
+                <span key={item.id} contentEditable={item.complete ? false : true} onBlur={(e) => handleEdit(e, item_index)} suppressContentEditableWarning={true} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}>{item.name}</span>
                 <span className="item-icons">
                     <DragHandle />
-                    <IconButton aria-label="delete" onClick={() => deleteItem(item.id)}><DeleteIcon fontSize="small" /></IconButton>
+                    <IconButton aria-label="delete" onClick={() => deleteItem(item.id, item_index)}><DeleteIcon fontSize="small" /></IconButton>
                 </span>
             </div>
         );
@@ -164,7 +155,7 @@ export function Tudu() {
         return (
             <div className="items">
                 {items.map((item, index) => (
-                    <SortableItem key={item.id} item={item} index={index} />
+                    <SortableItem key={item.id} item={item} item_index={index} index={index} />
                 ))}
             </div>
         );
@@ -181,23 +172,27 @@ export function Tudu() {
         });
     }
 
+    const handleEdit = (e, index) => {
+        const newName = e.target.textContent;
+        let newItems = [...presentItems];
+        newItems[index].name = newName;
+        setItems(newItems);
+    }
+
     const handleSortEnd = ({ oldIndex, newIndex }) => {
         let items = [...presentItems];
         let newItems = arrayMove(items, oldIndex, newIndex);
         setItems(newItems);
     }
 
-    const deleteItem = id => {
-        let index = presentItems.findIndex(item => item.id === id);
+    const deleteItem = (id, index) => {
         let newItems = [...presentItems];
         newItems.splice(index, 1);
         setItems(newItems);
         handleSnackbar(true, '', true, id, 'Item Deleted', handleUndoItems);
     }
 
-    const handleCheck = id => {
-        // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
-        let index = presentItems.findIndex(item => item.id === id);
+    const handleCheck = (id, index) => {
         let newItems = [...presentItems];
         const now = Date.now();
         if (newItems[index].complete === false) {
@@ -289,7 +284,6 @@ export function Tudu() {
                 <SortableList items={presentItems} useDragHandle={true} onSortEnd={handleSortEnd} />
                 <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
                     <TextField label="New item" ref={itemInput} />
-                    {/* <TextField label="New item" onChange={e => setNewItem(e.target.value)} value={target.value} /> */}
                     <br />
                     <Button variant="contained" disableElevation={true} color="primary" type="submit">Add Item</Button>
                     <ButtonGroup variant="outlined" color="primary" aria-label="large outlined primary button group">

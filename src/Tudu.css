@@ -9,6 +9,7 @@ html, body {
 }
 
 .bg {
+    /* filter: invert(); */
     background-color: #f9f4f5;
     /* background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(240,240,240,1) 42%); */
     background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(226,226,226,1) 42%, rgba(240,240,240,1) 52%);
@@ -33,7 +34,7 @@ html, body {
     margin-top: 20px;
 }
 
-.dark-theme-toggle {
+.MuiButtonBase-root.dark-theme-toggle {
     float: right;
     margin-right: -15px;
 }
@@ -69,10 +70,14 @@ form {
 .item {
     align-items: center;
     display: flex;
-    /* justify-content: space-between; */
     margin-bottom: 10px;
     width: 100%;
     word-break: break-word;
+    
+    /* restoring default mui body text styling that is not present on new span labels */
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.00938em;
 }
 
 .item.item.archive > label > .MuiTypography-root {
@@ -133,6 +138,10 @@ form {
 
 .item > label > .MuiTypography-root {
     line-height: 1.2;
+}
+
+.item.active .MuiCheckbox-root {
+    margin-left: -11px;
 }
 
 @media only screen and (max-width: 500px) {
