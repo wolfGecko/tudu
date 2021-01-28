@@ -8,7 +8,8 @@ import useUndo from 'use-undo';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import arrayMove from 'array-move';
 // MUI components and styles
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, createMuiTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import TextField from '@material-ui/core/TextField';
@@ -19,11 +20,31 @@ import Link from '@material-ui/core/Link';
 import DeleteIcon from '@material-ui/icons/Delete';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
-// import BrightnessHighIcon from '@material-ui/icons/BrightnessHigh';
+import BrightnessHighIcon from '@material-ui/icons/BrightnessHigh';
 // stylesheets
 import './Tudu.css';
 // functions
 import { idMaker, displayPrettyDate, getSuccessMessage } from './functions';
+
+const localStorage = window.localStorage;
+const orangeTheme = '#aa4415';
+const blueTheme = '#3f51b5';
+const metaThemeColor = document.querySelector("meta[name=theme-color]");
+
+const darkTheme = createMuiTheme({
+    palette: {
+        type: 'dark',
+        primary: {
+            main: '#f4621e',
+        },
+    },
+});
+
+const lightTheme = createMuiTheme({
+    palette: {
+        type: 'light',
+    },
+});
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -79,14 +100,20 @@ export function Tudu() {
     const [anyCompleted, setAnyCompleted] = useState(false);
     const [displayArchive, setDisplayArchive] = useState(false);
     const [requestCloseArchive, setRequestCloseArchive] = useState(false);
+    const initialTheme = () => (localStorage.getItem('useDarkTheme') === 'true' || localStorage.getItem('useDarkTheme') === true) ? true : false;
+    const [useDarkTheme, setUseDarkTheme] = useState(initialTheme());
 
     const itemInput = useRef();
 
     const db = useRef(null);
 
     useEffect(() => {
+        // set the theme color to orange for dark mode loading
+        if (localStorage.getItem('useDarkTheme') === 'true' || localStorage.getItem('useDarkTheme') === true) metaThemeColor.setAttribute("content", orangeTheme);
+    }, [])
+
+    useEffect(() => {
         // create indexedDB for client side storage if not already there and read any current data
-        // console.log('init DB and read hook')
         // calls the databaseOpen function below
         databaseOpen(() => {
             // callback to read data
@@ -253,7 +280,6 @@ export function Tudu() {
         const store = transaction.objectStore('archiveTodos');
         fromArchive.forEach(item => {
             const request = store.delete(item.id);
-            transaction.oncomplete = function (e) { console.log('records removed from archive') };
             request.onerror = e => console.error('An IndexedDB error has occurred', e);;
         });
         undoItems();
@@ -271,30 +297,41 @@ export function Tudu() {
         }
     }
 
+    const toggleDarkTheme = () => {
+        localStorage.setItem('useDarkTheme', !useDarkTheme);
+        metaThemeColor.setAttribute("content", useDarkTheme ? blueTheme : orangeTheme);
+        setUseDarkTheme(!useDarkTheme);
+    }
+
     return (
-        <div className="bg">
-            <div className="wrapper">
-                <IconButton aria-label="darktheme" color="primary" className="dark-theme-toggle"><Brightness4Icon fontSize="small" /></IconButton>
-                <h1>Tudu</h1>
-                <div className="title-line"></div>
-                {displayArchive === true &&
-                    <TuduArchive db={db.current} handleSnackbar={handleSnackbar} requestCloseArchive={requestCloseArchive} closeArchiveCallback={() => { setDisplayArchive(false); setRequestCloseArchive(false) }} />
-                }
-                <h3>{displayPrettyDate(new Date())}</h3>
-                <SortableList items={presentItems} useDragHandle={true} handleCheck={handleCheck} handleEdit={handleEdit} deleteItem={deleteItem} onSortEnd={handleSortEnd} />
-                <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
-                    <TextField label="New item" ref={itemInput} />
-                    <br />
-                    <Button variant="contained" disableElevation={true} color="primary" type="submit">Add Item</Button>
-                    <ButtonGroup variant="outlined" color="primary" aria-label="large outlined primary button group">
-                        <Button disabled={!anyCompleted} onClick={handleArchive}>Archive</Button>
-                        <Button onClick={handleDisplayArchive}>{displayArchive ? 'Hide Archive' : 'View Archive'}</Button>
-                    </ButtonGroup>
-                </form>
+        <ThemeProvider theme={useDarkTheme ? darkTheme : lightTheme}>
+            <div className={useDarkTheme ? "bg dark" : "bg"}>
+                <div className="wrapper">
+                    <IconButton aria-label="darktheme" color="primary" className="dark-theme-toggle" onClick={toggleDarkTheme}>
+                        {!useDarkTheme && <Brightness4Icon fontSize="small" />}
+                        {useDarkTheme && <BrightnessHighIcon fontSize="small" />}
+                    </IconButton>
+                    <h1>Tudu</h1>
+                    <div className="title-line"></div>
+                    {displayArchive === true &&
+                        <TuduArchive db={db.current} handleSnackbar={handleSnackbar} requestCloseArchive={requestCloseArchive} closeArchiveCallback={() => { setDisplayArchive(false); setRequestCloseArchive(false) }} />
+                    }
+                    <h3>{displayPrettyDate(new Date())}</h3>
+                    <SortableList helperClass={useDarkTheme ? "dark" : ""} items={presentItems} useDragHandle={true} handleCheck={handleCheck} handleEdit={handleEdit} deleteItem={deleteItem} onSortEnd={handleSortEnd} />
+                    <form className={classes.root} noValidate autoComplete="off" onSubmit={addNewItem}>
+                        <TextField label="New item" ref={itemInput} />
+                        <br />
+                        <Button variant="contained" disableElevation={true} color="primary" type="submit">Add Item</Button>
+                        <ButtonGroup variant="outlined" color="primary" aria-label="large outlined primary button group">
+                            <Button disabled={!anyCompleted} onClick={handleArchive}>Archive</Button>
+                            <Button onClick={handleDisplayArchive}>{displayArchive ? 'Hide Archive' : 'View Archive'}</Button>
+                        </ButtonGroup>
+                    </form>
+                </div>
+                <div className="credit">🖥️ by <Link href="https://liaminnis.com" color="primary" target="_blank" rel="noopener noreferrer">Liam</Link></div>
+                <SnackbarHandler data={snackbarData} onClose={handleCloseSnackbar} />
             </div>
-            <div className="credit">🖥️ by <Link href="https://liaminnis.com" color="primary" target="_blank" rel="noopener noreferrer">Liam</Link></div>
-            <SnackbarHandler data={snackbarData} onClose={handleCloseSnackbar} />
-        </div>
+        </ThemeProvider>
     );
 }
 

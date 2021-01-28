@@ -8,12 +8,36 @@ html, body {
     min-width: 320px;
 }
 
+.dark.bg {
+    background: linear-gradient(-4deg, rgba(56,56,56,1) 42%, rgba(51,51,51,1) 42%);
+}
+
+.dark .wrapper {
+    border-color: #222;
+    background-color: #424242;
+}
+
+body .dark, .dark .credit {
+    color: white;
+}
+
+.dark h3, .dark .item.archive .MuiFormControlLabel-label.Mui-disabled {
+    color: #BBB;
+}
+
+.dark .MuiFormControlLabel-root.Mui-disabled .MuiButtonBase-root {
+    color: rgba(244, 98, 30, .5);
+}
+
+.dark.item.active {
+    color: white;
+}
+
 .bg {
     /* filter: invert(); */
     background-color: #f9f4f5;
     /* background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(240,240,240,1) 42%); */
     background: linear-gradient(-4deg, rgba(248,248,248,1) 42%, rgba(226,226,226,1) 42%, rgba(240,240,240,1) 52%);
-    /* background: linear-gradient(-4deg, rgba(56,56,56,1) 42%, rgba(51,51,51,1) 42%); */
     min-height: 100vh;
     padding: 0 10px;
     display: flex;
@@ -24,10 +48,8 @@ html, body {
 
 .wrapper {
     border: 1px solid #ccc;
-    /* border-color: #222; */
     border-radius: 4px;
     background-color: #f8f8f8;
-    /* background-color: #333333; */
     padding: 20px 40px;
     max-width: 640px;
     width: 100%;
@@ -157,6 +179,15 @@ form {
 }
 
 @media only screen and (max-width: 500px) {
+    .dark.bg {
+        background-image: none;
+        background-color: #333333;
+    }
+
+    .dark .wrapper { 
+        background: 0;
+    }
+
     .bg {
         background-color: rgba(248,248,248,1);
         background-image: none;
@@ -182,7 +213,6 @@ form {
     .wrapper {
         margin-top: 0;
         padding: 0 0 0 0;
-        border-color: red;
         border: none;
         background: 0;
     }

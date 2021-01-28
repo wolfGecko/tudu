@@ -107,7 +107,7 @@ errors
 Lessons Learned
     auto margin in a flex container is dope
     functional components should be declared outside of the main component, otherwise they are fully recreated each render. I tried this a couple times earlier but didn't quite understand the props object within a js file
-
+    localStorage returns values as strings. true vs 'true' was messing me up, didnt notice the color difference in the console.log
 
 Hosting - Firebase
 Domain - tudu.gq
