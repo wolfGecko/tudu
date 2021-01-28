@@ -21,6 +21,7 @@ Tudu
         // store the date it was completed so the archive can access it
         // Unmark items as complete
 Archive
+    click to show date?
     scroll to active/bottom button when archive is open?
     null state
     // Archive completed items
