@@ -144,6 +144,18 @@ form {
     margin-left: -11px;
 }
 
+.MuiButtonBase-root.draghandle {
+    padding: 0px;
+    width: 44px;
+    height: 44px;
+}
+
+.MuiButtonBase-root.draghandle .MuiIconButton-label {
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+}
+
 @media only screen and (max-width: 500px) {
     .bg {
         background-color: rgba(248,248,248,1);
@@ -179,6 +191,12 @@ form {
         padding: 8px;
     }
 
+    .MuiButtonBase-root.draghandle {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+    }
+
     .item > label > .MuiTypography-root {
         line-height: 1.1;
     }
@@ -188,8 +206,7 @@ form {
     }
 
     .item .item-icons {
-        /* margin-left: -16px; */
-        margin-right: -12px;
+        margin-right: -10px;
     }
     
     

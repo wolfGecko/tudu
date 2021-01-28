@@ -6,10 +6,10 @@ Tudu
     null state? ie no items
         initial null state, e.g. [x] Find the best todo list app on the web
     about section
-    // responsive design
     MUI text input label doesnt reset when value is manually reset for uncontrolled input 
-    Update Items
-        edit text - maybe not
+    // responsive design
+    // Update Items
+        // edit text
         // reorder
     // Create New Item
     // Read Items and Write Items from and to IndexedDB
@@ -91,6 +91,7 @@ Performance
         is this made worse by undo?
 
 Bugs
+    // Drag handle does allow clicks on button padding -- only liked clicks on the label. got rid of padding, made the button height and width match, set label h, w, and border radius to 100%, 100%, 50%.
     // TuduArchive snackbar and Tudu snackbar can be open at the same time and overlap each other.
         // make a single snackbar comp? --done, its beautiful
     // had some weirdness with deletedItem being one behind the current value.
@@ -104,6 +105,7 @@ errors
 
 Lessons Learned
     auto margin in a flex container is dope
+    functional components should be declared outside of the main component, otherwise they are fully recreated each render. I tried this a couple times earlier but didn't quite understand the props object within a js file
 
 
 Hosting - Firebase

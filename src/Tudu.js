@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const DragHandle = SortableHandle(() => <IconButton aria-label="reorder"><DragHandleIcon fontSize="small" /></IconButton>);
+const DragHandle = SortableHandle(() => <IconButton className="draghandle" aria-label="reorder"><DragHandleIcon fontSize="small" /></IconButton>);
 
 const SortableItem = SortableElement(({ item, item_index, handleCheck, handleEdit, deleteItem }) => {
     return (
