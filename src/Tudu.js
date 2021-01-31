@@ -21,6 +21,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import BrightnessHighIcon from '@material-ui/icons/BrightnessHigh';
+import HelpIcon from '@material-ui/icons/Help';
 // stylesheets
 import './Tudu.css';
 // functions
@@ -176,15 +177,17 @@ export function Tudu() {
 
     const addNewItem = e => {
         e.preventDefault();
-        let devName = itemInput.current.children[1].children[0].value;
-        if (devName.length > 0) {
+        const input = itemInput.current.children[1].children[0];
+        let itemName = input.value;
+        if (itemName.length === 0) input.focus();
+        if (itemName.length > 0) {
             let newItemData = { 'complete': false, 'completedTime': 0 };
-            newItemData.name = devName;
+            newItemData.name = itemName;
             newItemData.id = idMaker(9);
             let newItems = [...presentItems];
             newItems.push(newItemData);
             setItems(newItems);
-            itemInput.current.children[1].children[0].value = '';
+            input.value = '';
         }
     }
 
@@ -225,6 +228,7 @@ export function Tudu() {
         if (newItems[index].complete === false) {
             handleSnackbar(true, 'success-snackbar', false, id + now, getSuccessMessage(), '');
             newItems[index].completedTime = now;
+            window.navigator.vibrate([100, 30, 100]);
         } else {
             newItems[index].completedTime = 0;
         }
@@ -307,10 +311,13 @@ export function Tudu() {
         <ThemeProvider theme={useDarkTheme ? darkTheme : lightTheme}>
             <div className={useDarkTheme ? "bg dark" : "bg"}>
                 <div className="wrapper">
-                    <IconButton aria-label="darktheme" color="primary" className="dark-theme-toggle" onClick={toggleDarkTheme}>
-                        {!useDarkTheme && <Brightness4Icon fontSize="small" />}
-                        {useDarkTheme && <BrightnessHighIcon fontSize="small" />}
-                    </IconButton>
+                    <span className="top-right-btns">
+                        <IconButton className="help" aria-label="help"><HelpIcon fontSize="small" /></IconButton>
+                        <IconButton aria-label="darktheme" color="primary" className="dark-theme-toggle" onClick={toggleDarkTheme}>
+                            {!useDarkTheme && <Brightness4Icon fontSize="small" />}
+                            {useDarkTheme && <BrightnessHighIcon fontSize="small" />}
+                        </IconButton>
+                    </span>
                     <h1>Tudu</h1>
                     <div className="title-line"></div>
                     {displayArchive === true &&

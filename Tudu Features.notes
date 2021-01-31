@@ -1,12 +1,12 @@
 Tudu Features
 
 Tudu
-    lightmode / darkmode
-            https://material.io/design/color/dark-theme.html#ui-application
     null state? ie no items
         initial null state, e.g. [x] Find the best todo list app on the web
     about section
     MUI text input label doesnt reset when value is manually reset for uncontrolled input 
+    // lightmode / darkmode
+            // https://material.io/design/color/dark-theme.html#ui-application
     // responsive design
     // Update Items
         // edit text
@@ -85,7 +85,7 @@ Archive
 
 Housekeeping
     service worker
-    favicon
+    // favicon
 
 Performance
     Seems slow when state is holding lots of data

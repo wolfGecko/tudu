@@ -56,7 +56,7 @@ body .dark, .dark .credit {
     margin-top: 20px;
 }
 
-.MuiButtonBase-root.dark-theme-toggle {
+.top-right-btns {
     float: right;
     margin-right: -15px;
 }
@@ -217,7 +217,7 @@ form {
         background: 0;
     }
 
-    .item .MuiIconButton-root {
+    .item .MuiIconButton-root, .top-right-btns .MuiIconButton-root {
         padding: 8px;
     }
 
@@ -235,8 +235,12 @@ form {
         margin-bottom: 10px;
     }
 
-    .item .item-icons {
+    .item .item-icons, .top-right-btns {
         margin-right: -10px;
+    }
+
+    .top-right-btns {
+        margin-top: 4px;
     }
     
     
