@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 // internal
 import TuduArchive from './TuduArchive';
+import TuduHelpDialog from './TuduHelpDialog';
 import SnackbarHandler from './SnackbarHandler';
 // undo
 import useUndo from 'use-undo';
@@ -21,7 +22,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import BrightnessHighIcon from '@material-ui/icons/BrightnessHigh';
-import HelpIcon from '@material-ui/icons/Help';
 // stylesheets
 import './Tudu.css';
 // functions
@@ -312,7 +312,7 @@ export function Tudu() {
             <div className={useDarkTheme ? "bg dark" : "bg"}>
                 <div className="wrapper">
                     <span className="top-right-btns">
-                        <IconButton className="help" aria-label="help"><HelpIcon fontSize="small" /></IconButton>
+                        <TuduHelpDialog useDarkTheme={useDarkTheme} />
                         <IconButton aria-label="darktheme" color="primary" className="dark-theme-toggle" onClick={toggleDarkTheme}>
                             {!useDarkTheme && <Brightness4Icon fontSize="small" />}
                             {useDarkTheme && <BrightnessHighIcon fontSize="small" />}

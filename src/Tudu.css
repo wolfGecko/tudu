@@ -178,6 +178,29 @@ form {
     border-radius: 50%;
 }
 
+.help-operations {
+    list-style-type: none;
+}
+
+.help-operations li {
+    display: flex;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.help-operations li svg, .help-operations li button {
+    margin-right: 8px;
+}
+
+.help-operations.light li svg:not(.MuiSvgIcon-colorPrimary) {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.contact {
+    font-size: 13px;
+    margin-top: 25px;
+}
+
 @media only screen and (max-width: 500px) {
     .dark.bg {
         background-image: none;
@@ -243,5 +266,8 @@ form {
         margin-top: 4px;
     }
     
+    .help-operations {
+        padding-left: 16px;
+    }
     
   }
