@@ -184,12 +184,12 @@ form {
 
 .help-operations li {
     display: flex;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
     align-items: center;
 }
 
 .help-operations li svg, .help-operations li button {
-    margin-right: 8px;
+    margin-right: 12px;
 }
 
 .help-operations.light li svg:not(.MuiSvgIcon-colorPrimary) {

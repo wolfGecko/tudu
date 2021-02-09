@@ -66,6 +66,8 @@ export default function TuduHelpDialog(props) {
                         What to help me improve?
                         <br />
                         Send your suggestions to: <Link href="mailto:contact@tudu.anonaddy.com" color="primary">contact@tudu.anonaddy.com</Link>
+                        <br />
+                        v 2.0.1
                     </div>
                 </DialogContent>
                 <DialogActions>

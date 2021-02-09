@@ -57,20 +57,20 @@ const useStyles = makeStyles((theme) => ({
 
 const DragHandle = SortableHandle(() => <IconButton className="draghandle" aria-label="reorder"><DragHandleIcon fontSize="small" /></IconButton>);
 
-const SortableItem = SortableElement(({ item, item_index, handleCheck, handleEdit, deleteItem }) => {
+const SortableItem = SortableElement(({ item, handleCheck, handleEdit, deleteItem }) => {
     return (
         <div key={item.id} className={item.complete ? 'item complete active' : 'item active'}>
             <Checkbox
                 id={item.id}
                 checked={item.complete}
-                onChange={() => handleCheck(item.id, item_index)}
+                onChange={() => handleCheck(item.id)}
                 name={item.name}
                 color="primary"
             />
-            <span key={item.id} contentEditable={item.complete ? false : true} onBlur={(e) => handleEdit(e, item_index)} suppressContentEditableWarning={true} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}>{item.name}</span>
+            <span key={item.id} contentEditable={item.complete ? false : true} onBlur={(e) => handleEdit(e, item.id)} suppressContentEditableWarning={true} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}>{item.name}</span>
             <span className="item-icons">
                 <DragHandle />
-                <IconButton aria-label="delete" onClick={() => deleteItem(item.id, item_index)}><DeleteIcon fontSize="small" /></IconButton>
+                <IconButton aria-label="delete" onClick={() => deleteItem(item.id)}><DeleteIcon fontSize="small" /></IconButton>
             </span>
         </div>
     );
@@ -80,7 +80,7 @@ const SortableList = SortableContainer(({ items, handleCheck, handleEdit, delete
     return (
         <div className="items">
             {items.map((item, index) => (
-                <SortableItem key={item.id} item={item} item_index={index} index={index} handleCheck={handleCheck} handleEdit={handleEdit} deleteItem={deleteItem} />
+                <SortableItem key={item.id} item={item} index={index} handleCheck={handleCheck} handleEdit={handleEdit} deleteItem={deleteItem} />
             ))}
         </div>
     );
@@ -202,7 +202,9 @@ export function Tudu() {
         });
     }
 
-    const handleEdit = (e, index) => {
+    const handleEdit = (e, id) => {
+        // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
+        let index = presentItems.findIndex(item => item.id === id);
         const newName = e.target.textContent;
         let newItems = [...presentItems];
         newItems[index].name = newName;
@@ -215,14 +217,18 @@ export function Tudu() {
         setItems(newItems);
     }
 
-    const deleteItem = (id, index) => {
+    const deleteItem = id => {
+        // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
+        let index = presentItems.findIndex(item => item.id === id);
         let newItems = [...presentItems];
         newItems.splice(index, 1);
         setItems(newItems);
         handleSnackbar(true, '', true, id, 'Item Deleted', handleUndoItems);
     }
 
-    const handleCheck = (id, index) => {
+    const handleCheck = id => {
+        // finds the index of the item with that id and toggle it's complete value. could use index directly from the items.map function that calls this function but it seems sketchy
+        let index = presentItems.findIndex(item => item.id === id);
         let newItems = [...presentItems];
         const now = Date.now();
         if (newItems[index].complete === false) {
