@@ -111,7 +111,7 @@ export function Tudu() {
     useEffect(() => {
         // set the theme color to orange for dark mode loading
         if (localStorage.getItem('useDarkTheme') === 'true' || localStorage.getItem('useDarkTheme') === true) metaThemeColor.setAttribute("content", orangeTheme);
-    }, [])
+    }, []);
 
     useEffect(() => {
         // create indexedDB for client side storage if not already there and read any current data
@@ -234,7 +234,6 @@ export function Tudu() {
         if (newItems[index].complete === false) {
             handleSnackbar(true, 'success-snackbar', false, id + now, getSuccessMessage(), '');
             newItems[index].completedTime = now;
-            window.navigator.vibrate([100, 30, 100]);
         } else {
             newItems[index].completedTime = 0;
         }

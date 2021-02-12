@@ -97,6 +97,7 @@ Bugs
         // make a single snackbar comp? --done, its beautiful
     // had some weirdness with deletedItem being one behind the current value.
     // it was because i was passing the value from TuduArchive to Tudu to SnackbarHandler where it was executed. it wasnt getting the value from TuduArchive in real time when the undo button was clicked. solved by sending the item itself up the chain instead of saving it in state
+    cant check anything on safari iphone but can uncheck
 
 errors
     on reorder
@@ -108,6 +109,7 @@ Lessons Learned
     auto margin in a flex container is dope
     functional components should be declared outside of the main component, otherwise they are fully recreated each render. I tried this a couple times earlier but didn't quite understand the props object within a js file
     localStorage returns values as strings. true vs 'true' was messing me up, didnt notice the color difference in the console.log
+    window.navigator.vibrate works like a charm on andriod but bricks the code on iOS. What a feature!
 
 Hosting - Firebase
 Domain - tudu.gq
